@@ -25,12 +25,13 @@ namespace StarWarsAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetStarshipIdAsync()
+        [Route("{id}")]
+        public async Task<IActionResult> GetStarshipIdAsync([FromRoute] string id)
         {
             using (var httpClient = new HttpClient())
             {
                 httpClient.BaseAddress = new System.Uri("https://swapi.dev/api/");
-                var response     = await httpClient.GetAsync("starships/2/");
+                var response     = await httpClient.GetAsync($"starships/{id}/");
                 var jsonResponse = await response.Content.ReadAsStringAsync();
                 var starship = JsonConvert.DeserializeObject<ReadStarshipDto>(jsonResponse);
 

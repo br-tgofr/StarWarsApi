@@ -25,12 +25,13 @@ namespace StarWarsAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetPlanetIdAsync()
+        [Route("{id}")]
+        public async Task<IActionResult> GetPlanetIdAsync([FromRoute] string id)
         {
             using (var httpClient = new HttpClient())
             {
                 httpClient.BaseAddress = new Uri("https://swapi.dev/api/");
-                var response     = await httpClient.GetAsync("planets/1/");
+                var response     = await httpClient.GetAsync($"planets/{id}/");
                 var jsonResponse = await response.Content.ReadAsStringAsync();
                 var planet = JsonConvert.DeserializeObject<ReadPlanetDto>(jsonResponse);
 

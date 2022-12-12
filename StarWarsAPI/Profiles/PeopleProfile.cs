@@ -8,7 +8,7 @@ namespace StarWarsAPI.Profiles
     {
         public PeopleProfile()
         {
-            CreateMap<People, ReadPeopleDto>();
+            CreateMap<ReadPeopleDto, People>();
         }
     }
 }

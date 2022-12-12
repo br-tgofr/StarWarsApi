@@ -19,7 +19,6 @@ namespace StarWarsAPI.Controllers
     {
         private AppDbContext _context;
         private IMapper _mapper;
-
         public PeopleController(AppDbContext context, IMapper mapper)
         {
             _context = context;
@@ -27,21 +26,38 @@ namespace StarWarsAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetIdPeopleAsync([FromQuery] ReadPeopleDto readDto)
+        [Route("{id}")]
+        public async Task<IActionResult> GetIdPeopleAsync([FromRoute] int id)
         {
-            using (var httpClient = new HttpClient())
             {
-                httpClient.BaseAddress = new System.Uri("https://swapi.dev/api/");
-                var response     = await httpClient.GetAsync($"people/{readDto.PeopleId}/");
-                var jsonResponse = await response.Content.ReadAsStringAsync();
-                var getPeople = JsonConvert.DeserializeObject<ReadPeopleDto>(jsonResponse);
-
-                if (getPeople != null)
+                using (var httpClient = new HttpClient())
                 {
-                    ReadPeopleDto readPeopleDto = _mapper.Map<ReadPeopleDto>(getPeople);
-                    return Ok(readPeopleDto);
+                    People result = _context.Peoples.FirstOrDefault(people => people.PeopleId == id);
+
+                    if (result != null)
+                    {
+                        return Ok(result);
+                    }
+                    else
+                    {
+                        ReadPeopleDto readPeopleId = new ReadPeopleDto();
+                        readPeopleId.PeopleId = id;
+
+                        httpClient.BaseAddress = new Uri("https://swapi.dev/api/");
+                        var response = await httpClient.GetAsync($"people/{id}/");
+                        var jsonResponse = await response.Content.ReadAsStringAsync();
+                        var getPeople = JsonConvert.DeserializeObject<ReadPeopleDto>(jsonResponse);
+
+                        if (getPeople != null)
+                        {
+                            People people = _mapper.Map<People>(getPeople);
+                            _context.Peoples.Add(people);
+                            _context.SaveChanges();
+                            return Ok(people);
+                        }
+                        return NotFound();
+                    }
                 }
-                return NotFound();
             }
         }
     }
